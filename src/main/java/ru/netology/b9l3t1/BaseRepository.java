@@ -1,13 +1,10 @@
 package ru.netology.b9l3t1;
 
-import com.zaxxer.hikari.HikariDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.jdbc.JdbcTemplateAutoConfiguration;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
-import javax.sql.DataSource;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,11 +15,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @org.springframework.stereotype.Repository
-public class Repository {
+public class BaseRepository {
     @Autowired
-    DataSource dataSource;
-
-    private String query;
+    NamedParameterJdbcTemplate template;
 
     private static String read(String scriptFileName) {
         try (InputStream is = new ClassPathResource(scriptFileName).getInputStream();
@@ -34,9 +29,9 @@ public class Repository {
     }
 
     public List<QueryResult> getProductName(String name) {
-        Map<String, Object> queryResultMap = new HashMap<>();
-        NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(dataSource);
-        return template.query(query, );
-        BeanPropertyRowMapper
+        String query = read("query.sql");
+        Map<String,Object> paramMap = new HashMap<>(1);
+        paramMap.put("name", name);
+        return this.template.query(query, paramMap, new BeanPropertyRowMapper<>(QueryResult.class));
     }
 }
